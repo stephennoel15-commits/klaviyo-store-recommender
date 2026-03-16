@@ -90,9 +90,14 @@ async function updateKlaviyo(profileId, storeId) {
     body: JSON.stringify(body)
   })
 
-  if (!res.ok) {
-    throw new Error("Failed updating Klaviyo profile")
-  }
+ if (!res.ok) {
+
+  const errorText = await res.text()
+
+  console.error("Klaviyo error:", errorText)
+
+  throw new Error("Klaviyo API error: " + errorText)
+}
 }
 
 export default async function handler(req, res) {
