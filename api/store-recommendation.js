@@ -64,7 +64,8 @@ async function geocodeAddress(address) {
   }
 }
 
-async function updateKlaviyo(profileId, storeId) {
+// UPDATED: now accepts full store object
+async function updateKlaviyo(profileId, store) {
 
   const url = `https://a.klaviyo.com/api/profiles/${profileId}`
 
@@ -74,7 +75,16 @@ async function updateKlaviyo(profileId, storeId) {
       id: profileId,
       attributes: {
         properties: {
-          mystorerec: storeId
+          mystorerec: {
+            id: store.id,
+            title: store.title,
+            link: store.link,
+            image_link: store.image_link,
+            address1: store.address1,
+            city: store.city,
+            state: store.state,
+            zip: store.zip
+          }
         }
       }
     }
@@ -90,14 +100,14 @@ async function updateKlaviyo(profileId, storeId) {
     body: JSON.stringify(body)
   })
 
- if (!res.ok) {
+  if (!res.ok) {
 
-  const errorText = await res.text()
+    const errorText = await res.text()
 
-  console.error("Klaviyo error:", errorText)
+    console.error("Klaviyo error:", errorText)
 
-  throw new Error("Klaviyo API error: " + errorText)
-}
+    throw new Error("Klaviyo API error: " + errorText)
+  }
 }
 
 export default async function handler(req, res) {
@@ -151,7 +161,10 @@ export default async function handler(req, res) {
       })
     }
 
-    await updateKlaviyo(profile_id, closestStore.id)
+    console.log("Selected store:", closestStore.id)
+
+    // UPDATED: send full store object
+    await updateKlaviyo(profile_id, closestStore)
 
     return res.status(200).json({
       recommended_store: closestStore.id,
